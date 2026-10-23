@@ -66,7 +66,7 @@ let lastRenderedLyricSignature = "";
 let activeCategoryFilter = null;
 
 // Audio setup
-const audio = new Audio("/elements-1959.m4a");
+const audio = new Audio(`${import.meta.env.BASE_URL}elements-1959.m4a`);
 audio.preload = "auto";
 
 // DOM references
