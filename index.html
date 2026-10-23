@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <title>The Elements — 3D Periodic Table Synced to Tom Lehrer (1959)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Radial atmospheric background glow synced to active element category -->
+      <div id="ambient-glow" aria-hidden="true"></div>
+
+      <!-- Three.js 3D Canvas Layer -->
+      <div id="canvas-container" aria-label="Interactive 3D Atomic Orbital & Bohr Model"></div>
+
+      <!-- Top Header Bar -->
+      <header class="top-bar">
+        <div class="brand-lockup">
+          <h1 class="brand-title">The Elements</h1>
+          <p class="brand-subtitle">Music by Tom Lehrer 1959</p>
+        </div>
+
+        <div class="player-center">
+          <div class="player-controls-row">
+            <button type="button" id="play-btn" class="play-pill" aria-label="Play or pause song">
+              <span class="play-icon" id="play-icon">▶</span>
+              <span id="play-label">PLAY</span>
+            </button>
+
+            <button
+              type="button"
+              id="reset-btn"
+              class="reset-pill is-hidden"
+              title="Reset song to beginning"
+              aria-label="Reset song"
+            >
+              <span id="reset-label">RESET</span>
+              <span class="mini-waveform" id="mini-waveform" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span>
+              </span>
+            </button>
+
+            <div class="scrubber-wrap">
+              <input
+                type="range"
+                id="song-scrubber"
+                class="song-scrubber"
+                min="0"
+                max="85.47"
+                step="0.01"
+                value="0"
+                aria-label="Seek song timeline"
+              />
+            </div>
+
+            <div class="time-readout" id="time-readout">00:00.00 / 01:25.47</div>
+          </div>
+
+          <div class="lyric-line" id="lyric-line" aria-live="polite">
+            There's antimony, arsenic, aluminum, selenium,
+          </div>
+        </div>
+
+        <div class="header-right-spacer" aria-hidden="true"></div>
+      </header>
+
+      <!-- Center Top Element Hero Identity -->
+      <section class="element-hero" aria-live="polite">
+        <div class="hero-atomic-num">
+          <span class="hero-dot" id="hero-dot"></span>
+          <span id="hero-number">18</span>
+        </div>
+        <div class="hero-symbol" id="hero-symbol">Ar</div>
+        <div class="hero-name" id="hero-name">ARGON</div>
+        <button
+          type="button"
+          class="hero-meta-btn"
+          id="hero-meta"
+          title="Click to jump to this element in the song"
+        >
+          <span id="hero-category">NOBLE GAS</span>
+          <span class="meta-sep">•</span>
+          <span id="hero-sung-info">▶ SUNG #089 @ 01:07.30</span>
+        </button>
+      </section>
+
+      <!-- Left HUD: Atomic Essentials -->
+      <aside class="hud-panel hud-left" aria-label="Atomic Essentials">
+        <div class="hud-section-header">
+          <span>ATOMIC ESSENTIALS</span>
+          <span id="hud-block">3P-BLOCK</span>
+        </div>
+
+        <dl class="hud-data-list">
+          <div class="hud-row">
+            <dt>PROTONS / ELECTRONS</dt>
+            <dd id="hud-protons">18 p⁺ / 18 e⁻</dd>
+          </div>
+          <div class="hud-row">
+            <dt>VALENCE ELECTRONS</dt>
+            <dd id="hud-valence">8 e⁻ (3p-Block)</dd>
+          </div>
+          <div class="hud-row">
+            <dt>SHELLS (K–Q)</dt>
+            <dd id="hud-shells">2 · 8 · 8</dd>
+          </div>
+          <div class="hud-row">
+            <dt>ORBITAL CONFIG</dt>
+            <dd id="hud-orbital">[Ne] 3s² 3p⁶</dd>
+          </div>
+          <div class="hud-row">
+            <dt>ATOMIC WEIGHT</dt>
+            <dd id="hud-weight">39.948 u</dd>
+          </div>
+          <div class="hud-row">
+            <dt>PERIOD / GROUP</dt>
+            <dd id="hud-period-group">Period 3 · Group 18</dd>
+          </div>
+        </dl>
+
+        <p class="hud-blurb" id="hud-blurb">
+          Makes up nearly 1% of the air you breathe, almost all of it created by the slow radioactive decay of Potassium-40 deep within Earth's crust.
+        </p>
+      </aside>
+
+      <!-- Right HUD: Notable Uses & Spectral Fingerprint -->
+      <aside class="hud-panel hud-right" aria-label="Notable Uses and Spectral Fingerprint">
+        <div class="hud-card">
+          <div class="hud-section-header">
+            <span>NOTABLE USES</span>
+            <span>UTILITY</span>
+          </div>
+          <ol class="uses-list" id="hud-uses">
+            <li><span class="use-idx">01</span><span>TIG &amp; MIG arc welding shielding atmosphere</span></li>
+            <li><span class="use-idx">02</span><span>Double-pane thermal window insulation</span></li>
+            <li><span class="use-idx">03</span><span>Historical museum document preservation</span></li>
+            <li><span class="use-idx">04</span><span>Blue-green argon-ion surgical lasers</span></li>
+          </ol>
+        </div>
+
+        <div class="hud-card spectra-card">
+          <div class="hud-section-header">
+            <span>SPECTRAL FINGERPRINT</span>
+            <span>380–750 NM</span>
+          </div>
+          <div class="spectra-box" id="spectra-box" role="img" aria-label="Atomic emission spectrum">
+            <div class="spectra-continuum"></div>
+            <div class="spectra-lines" id="spectra-lines"></div>
+          </div>
+          <div class="spectra-scale">
+            <span>400nm</span>
+            <span>500nm</span>
+            <span>600nm</span>
+            <span>700nm</span>
+          </div>
+          <div class="spectra-peaks" id="spectra-peaks">
+            λ = 415.9 · 420.1 · 451.1 · 696.5 · 706.7 nm
+          </div>
+        </div>
+      </aside>
+
+      <!-- Bottom Section: Full 118-Element Periodic Table -->
+      <section class="periodic-dock" aria-label="Periodic Table of Elements">
+        <div class="dock-header">
+          <div class="dock-instructions">
+            PERIODIC TABLE (1–118) · CLICK ELEMENT TO INSPECT · SHIFT+CLICK TO SEEK SONG
+          </div>
+          <div class="dock-legend" id="dock-legend">
+            <span class="legend-item" data-cat="alkali"><i class="dot"></i>ALKALI</span>
+            <span class="legend-item" data-cat="alk-earth"><i class="dot"></i>ALK EARTH</span>
+            <span class="legend-item" data-cat="transition"><i class="dot"></i>TRANSITION</span>
+            <span class="legend-item" data-cat="post-trans"><i class="dot"></i>POST-TRANS</span>
+            <span class="legend-item" data-cat="metalloid"><i class="dot"></i>METALLOID</span>
+            <span class="legend-item" data-cat="nonmetal"><i class="dot"></i>NONMETAL</span>
+            <span class="legend-item" data-cat="halogen"><i class="dot"></i>HALOGEN</span>
+            <span class="legend-item" data-cat="noble-gas"><i class="dot"></i>NOBLE GAS</span>
+            <span class="legend-item" data-cat="lanthanide"><i class="dot"></i>LANTHANIDE</span>
+            <span class="legend-item" data-cat="actinide"><i class="dot"></i>ACTINIDE</span>
+          </div>
+        </div>
+
+        <div class="periodic-grid-wrap">
+          <div class="periodic-grid" id="periodic-grid" role="grid"></div>
+        </div>
+      </section>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

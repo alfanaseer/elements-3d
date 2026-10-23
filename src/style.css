@@ -1,0 +1,773 @@
+/* MANDATORY: Apply color-scheme to :root for viewport-wide theming (dark-mode guide) */
+:root {
+  color-scheme: light dark;
+
+  --color-bg-light: #05080d;
+  --color-bg-dark: #05080d;
+  --color-bg: light-dark(var(--color-bg-light), var(--color-bg-dark));
+
+  --color-text-light: #f0f6fc;
+  --color-text-dark: #f0f6fc;
+  --color-text: light-dark(var(--color-text-light), var(--color-text-dark));
+
+  --color-muted: #76869a;
+  --color-dim: #4c5b6e;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-cell-bg: rgba(20, 27, 36, 0.86);
+  --color-cell-border: rgba(255, 255, 255, 0.075);
+
+  --active-color: #26d0ce;
+
+  /* Category Palette matching Google DeepMind video */
+  --cat-alkali: #ff6b4a;
+  --cat-alk-earth: #f5b041;
+  --cat-transition: #5b8def;
+  --cat-post-trans: #45e3b0;
+  --cat-metalloid: #a569ff;
+  --cat-nonmetal: #3ae374;
+  --cat-halogen: #ff4da6;
+  --cat-noble-gas: #26d0ce;
+  --cat-lanthanide: #ff9f68;
+  --cat-actinide: #ff6392;
+
+  /* Scrollbar tokens (customize-scrollbar-color-and-thickness guide) */
+  --scrollbar-thumb: rgba(120, 145, 175, 0.35);
+  --scrollbar-track: rgba(8, 12, 18, 0.85);
+
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+#app {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  scrollbar-width: thin;
+}
+
+/* Legacy fallback for WebKit/Blink browsers (customize-scrollbar-color-and-thickness guide) */
+@supports not (scrollbar-color: auto) {
+  #app::-webkit-scrollbar,
+  .periodic-grid-wrap::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  #app::-webkit-scrollbar-thumb,
+  .periodic-grid-wrap::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+  }
+
+  #app::-webkit-scrollbar-track,
+  .periodic-grid-wrap::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+}
+
+/* Volumetric atmospheric backlight glow behind the 3D element (matching thumb_1080p.jpg) */
+#ambient-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle 220px at 50% 45%, rgba(38, 208, 206, 0.4) 0%, rgba(38, 208, 206, 0.18) 48%, transparent 100%),
+    radial-gradient(ellipse 48% 42% at 50% 45%, rgba(38, 208, 206, 0.24) 0%, rgba(38, 208, 206, 0.09) 45%, transparent 78%);
+  transition: background 0.35s ease;
+}
+
+#ambient-glow::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 380px;
+  height: 380px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--active-color);
+  opacity: 0.28;
+  filter: blur(72px);
+  transition: background-color 0.35s ease;
+}
+
+/* Three.js Canvas Layer */
+#canvas-container {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  cursor: grab;
+}
+
+#canvas-container:active {
+  cursor: grabbing;
+}
+
+/* Top Header Bar */
+.top-bar {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 9px 24px 8px;
+  border-bottom: 1px solid var(--color-border);
+  background: linear-gradient(180deg, rgba(5, 8, 13, 0.85) 0%, rgba(5, 8, 13, 0.35) 100%);
+  backdrop-filter: blur(8px);
+}
+
+.brand-lockup {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.brand-title {
+  font-size: 1.18rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  line-height: 1.15;
+}
+
+.brand-subtitle {
+  font-size: 0.68rem;
+  color: var(--color-muted);
+  letter-spacing: 0.01em;
+}
+
+/* Player Controls & Karaoke Lyric Row */
+.player-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.player-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.play-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 28px;
+  padding: 0 15px;
+  border-radius: 999px;
+  border: none;
+  background: #ffffff;
+  color: #06090f;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.play-pill:hover {
+  transform: scale(1.03);
+}
+
+.play-pill.is-playing {
+  background: #f25c54;
+  color: #ffffff;
+  box-shadow: 0 0 18px rgba(242, 92, 84, 0.5);
+}
+
+.play-icon {
+  font-size: 0.65rem;
+}
+
+.reset-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reset-pill.is-hidden {
+  display: none;
+}
+
+.reset-pill:hover {
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+}
+
+.mini-waveform {
+  display: none;
+  align-items: center;
+  gap: 2px;
+  height: 11px;
+}
+
+.mini-waveform span {
+  display: block;
+  width: 2px;
+  height: 100%;
+  background: var(--active-color);
+  border-radius: 2px;
+  animation: wavePulse 0.55s ease-in-out infinite alternate;
+}
+
+.mini-waveform span:nth-child(2) {
+  animation-delay: 0.12s;
+}
+.mini-waveform span:nth-child(3) {
+  animation-delay: 0.24s;
+}
+.mini-waveform span:nth-child(4) {
+  animation-delay: 0.08s;
+}
+.mini-waveform span:nth-child(5) {
+  animation-delay: 0.19s;
+}
+
+@keyframes wavePulse {
+  0% {
+    transform: scaleY(0.28);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+.scrubber-wrap {
+  width: 320px;
+  display: flex;
+  align-items: center;
+}
+
+.song-scrubber {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 3.5px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--active-color) 0%,
+    var(--active-color) var(--scrubber-pct, 0%),
+    rgba(255, 255, 255, 0.14) var(--scrubber-pct, 0%),
+    rgba(255, 255, 255, 0.14) 100%
+  );
+  outline: none;
+  cursor: pointer;
+}
+
+.song-scrubber::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--active-color);
+  box-shadow: 0 0 10px var(--active-color);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.song-scrubber::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+}
+
+.time-readout {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--color-muted);
+  letter-spacing: 0.04em;
+  min-width: 122px;
+}
+
+.lyric-line {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--color-muted);
+  letter-spacing: 0.02em;
+  min-height: 16px;
+  text-align: center;
+}
+
+.lyric-word {
+  transition: color 0.1s ease;
+}
+
+.lyric-word.is-sung {
+  color: rgba(240, 246, 252, 0.78);
+}
+
+.lyric-word.is-current {
+  font-weight: 700;
+}
+
+/* Center Top Element Hero Identity */
+.element-hero {
+  position: absolute;
+  top: 64px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  pointer-events: auto;
+}
+
+.hero-atomic-num {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #dbe7f5;
+  margin-bottom: -3px;
+}
+
+.hero-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--active-color);
+  box-shadow: 0 0 8px var(--active-color);
+}
+
+.hero-symbol {
+  font-size: clamp(2.8rem, 4.8vh, 3.8rem);
+  font-weight: 700;
+  line-height: 1.0;
+  letter-spacing: -0.03em;
+  color: var(--active-color);
+  text-shadow: 0 0 28px rgba(38, 208, 206, 0.42);
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+.hero-name {
+  font-size: 0.86rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  color: #ffffff;
+  margin-top: 2px;
+}
+
+.hero-meta-btn {
+  margin-top: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.hero-meta-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Left & Right HUD Panels — vertically centered in the middle band so they never collide with bottom dock */
+.hud-panel {
+  position: absolute;
+  top: 44%;
+  transform: translateY(-50%);
+  z-index: 8;
+  width: 264px;
+  pointer-events: auto;
+}
+
+.hud-left {
+  left: 24px;
+}
+
+.hud-right {
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.hud-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.63rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--color-muted);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 6px;
+}
+
+.hud-data-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.hud-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.045);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+}
+
+.hud-row dt {
+  color: var(--color-muted);
+  letter-spacing: 0.04em;
+}
+
+.hud-row dd {
+  color: #eef5fc;
+  font-weight: 600;
+  text-align: right;
+}
+
+.hud-blurb {
+  margin-top: 10px;
+  font-size: 0.69rem;
+  line-height: 1.46;
+  color: var(--color-muted);
+}
+
+/* Right HUD: Notable Uses */
+.uses-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.uses-list li {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  align-items: baseline;
+  font-size: 0.69rem;
+  line-height: 1.35;
+  color: #dce6f2;
+}
+
+.use-idx {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--color-dim);
+}
+
+/* Right HUD: Spectral Fingerprint (380–750 NM) */
+.spectra-box {
+  position: relative;
+  width: 100%;
+  height: 40px;
+  border-radius: 3px;
+  background: #060a10;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.spectra-continuum {
+  position: absolute;
+  inset: 0;
+  opacity: 0.17;
+  background: linear-gradient(
+    90deg,
+    #6a0dad 0%,
+    #3b3bff 16%,
+    #00bfff 32%,
+    #00e676 48%,
+    #ffeb3b 66%,
+    #ff9800 80%,
+    #f44336 92%,
+    #880e4f 100%
+  );
+}
+
+.spectra-lines {
+  position: absolute;
+  inset: 0;
+}
+
+.spectral-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  transform: translateX(-50%);
+  animation: spectralFlash 0.28s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@keyframes spectralFlash {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scaleY(0.2);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) scaleY(1);
+  }
+}
+
+.spectra-scale {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--color-dim);
+  padding: 4px 4px 2px;
+}
+
+.spectra-peaks {
+  font-family: var(--font-mono);
+  font-size: 0.59rem;
+  color: var(--color-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Bottom Section: Full 118-Element Periodic Table */
+.periodic-dock {
+  position: relative;
+  z-index: 10;
+  padding: 0 24px 10px;
+  background: linear-gradient(0deg, rgba(5, 8, 13, 0.94) 0%, rgba(5, 8, 13, 0.65) 82%, transparent 100%);
+}
+
+.dock-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 6px;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.dock-instructions {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.07em;
+  color: var(--color-muted);
+}
+
+.dock-legend {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 3.5px;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.05em;
+  color: var(--color-muted);
+  cursor: pointer;
+  padding: 1px 3px;
+  border-radius: 3px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.legend-item:hover,
+.legend-item.is-selected {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.legend-item .dot {
+  width: 5.5px;
+  height: 5.5px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend-item[data-cat="alkali"] .dot {
+  background: var(--cat-alkali);
+}
+.legend-item[data-cat="alk-earth"] .dot {
+  background: var(--cat-alk-earth);
+}
+.legend-item[data-cat="transition"] .dot {
+  background: var(--cat-transition);
+}
+.legend-item[data-cat="post-trans"] .dot {
+  background: var(--cat-post-trans);
+}
+.legend-item[data-cat="metalloid"] .dot {
+  background: var(--cat-metalloid);
+}
+.legend-item[data-cat="nonmetal"] .dot {
+  background: var(--cat-nonmetal);
+}
+.legend-item[data-cat="halogen"] .dot {
+  background: var(--cat-halogen);
+}
+.legend-item[data-cat="noble-gas"] .dot {
+  background: var(--cat-noble-gas);
+}
+.legend-item[data-cat="lanthanide"] .dot {
+  background: var(--cat-lanthanide);
+}
+.legend-item[data-cat="actinide"] .dot {
+  background: var(--cat-actinide);
+}
+
+.periodic-grid-wrap {
+  width: 100%;
+  max-width: 1480px;
+  margin: 0 auto;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  scrollbar-width: thin;
+}
+
+.periodic-grid {
+  display: grid;
+  grid-template-columns: repeat(18, minmax(0, 1fr));
+  grid-template-rows: repeat(7, 19px) repeat(2, 19px);
+  gap: 2.5px;
+}
+
+/* Slight visual separation before Lanthanide row (row 8) */
+.pt-cell[style*="grid-row: 8"],
+.pt-cell[style*="grid-row: 9"] {
+  transform: translateY(3px);
+}
+
+.pt-range-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  color: var(--color-dim);
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+}
+
+.pt-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 5px;
+  background: var(--color-cell-bg);
+  border: 1px solid var(--color-cell-border);
+  border-bottom: 1.5px solid color-mix(in srgb, var(--el-color) 42%, transparent);
+  border-radius: 2px;
+  color: #d8e2ef;
+  cursor: pointer;
+  transition: transform 0.12s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.18s ease;
+}
+
+.pt-cell:hover {
+  border-color: var(--el-color);
+  background: color-mix(in srgb, var(--el-color) 24%, rgba(20, 27, 36, 0.95));
+  z-index: 2;
+}
+
+.pt-cell.was-sung {
+  border-color: color-mix(in srgb, var(--el-color) 65%, transparent);
+  background: color-mix(in srgb, var(--el-color) 14%, rgba(20, 27, 36, 0.9));
+}
+
+.pt-cell.is-active {
+  background: var(--el-color) !important;
+  border-color: #ffffff !important;
+  color: #04070c !important;
+  box-shadow: 0 0 16px var(--el-color), 0 0 4px #ffffff;
+  z-index: 4;
+}
+
+.pt-cell.is-active .pt-z,
+.pt-cell.is-active .pt-sym {
+  color: #04070c !important;
+  font-weight: 700;
+}
+
+.pt-z {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  color: var(--color-dim);
+  line-height: 1;
+}
+
+.pt-sym {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #e6eef8;
+  line-height: 1;
+}
+
+/* Category highlight filter from legend */
+.periodic-grid[data-highlight-cat] .pt-cell {
+  opacity: 0.22;
+}
+.periodic-grid[data-highlight-cat="alkali"] .pt-cell[data-cat="alkali"],
+.periodic-grid[data-highlight-cat="alk-earth"] .pt-cell[data-cat="alk-earth"],
+.periodic-grid[data-highlight-cat="transition"] .pt-cell[data-cat="transition"],
+.periodic-grid[data-highlight-cat="post-trans"] .pt-cell[data-cat="post-trans"],
+.periodic-grid[data-highlight-cat="metalloid"] .pt-cell[data-cat="metalloid"],
+.periodic-grid[data-highlight-cat="nonmetal"] .pt-cell[data-cat="nonmetal"],
+.periodic-grid[data-highlight-cat="halogen"] .pt-cell[data-cat="halogen"],
+.periodic-grid[data-highlight-cat="noble-gas"] .pt-cell[data-cat="noble-gas"],
+.periodic-grid[data-highlight-cat="lanthanide"] .pt-cell[data-cat="lanthanide"],
+.periodic-grid[data-highlight-cat="actinide"] .pt-cell[data-cat="actinide"] {
+  opacity: 1;
+  border-color: var(--el-color);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--el-color) 45%, transparent);
+}
